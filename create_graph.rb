@@ -430,14 +430,42 @@ def output_graph(path, graph)
 end
 
 
+ /   [
+    	{
+        stop_id: <stop_id>
+        name: <name>,
+        loc: {
+                lat: <latitude>,
+                lon: <longitude>
+            }
+        zip: <zipcode>,
+        edges: [
+                {
+                    "dest": <dest_stop_id>,
+                    "dur": <edge_duration>,
+                    "type": <edge_type>,
+                    "open": <hour_of_opening>,
+                    "close": <hour_of_closing>,
+                    "line": <line_number>,
+                    "dir": <line_direction>,
+                    "freq": <average_frequency>
+                }
+            ]
+        }
+    ]
+
+    /
+
 def output_graph_mini(path, graph)
     fout = File.open(path, 'w')
 
-    fout.write("{")
+    fout.write("[")
     graph.each_with_index { |(key, node), index_node|
         output = ""
         output += "," if index_node > 0
-        output += "\"#{key}\":{\"name\":\"#{node[:name]}\","
+        output = "{"
+        output += "\"stop_id\":\"#{key}\","
+        output += "\"name\":\"#{node[:name]}\","
 		output += "\"loc\":{\"lat\":#{node[:lat].to_f.round(5)},\"lon\":#{node[:lon].to_f.round(5)}},"
 		output += "\"zip\":\"#{node[:zip]}\",\"edges\": ["
 		
@@ -449,7 +477,7 @@ def output_graph_mini(path, graph)
 				#p sub_edge[:dir] if dest_id == "3766635"
                 output += "{\"dest\":#{dest_id},\"dur\":#{sub_edge[:duration]},"
 				output += "\"type\":#{sub_edge[:type]},"
-				output += "\"open\":\"#{sub_edge[:begin_time]}\",\"close\":\"#{sub_edge[:end_time]}\","
+				#output += "\"open\":\"#{sub_edge[:begin_time]}\",\"close\":\"#{sub_edge[:end_time]}\","
 				output += "\"line\":\"#{sub_edge[:line]}\""
 				output += ",\"dir\":\"#{sub_edge[:dir]}\"" if sub_edge[:dir] != "" and sub_edge[:dir] != '"'
 				output += ",\"freq\":#{sub_edge[:freq]}" if not sub_edge[:freq].nil? and sub_edge[:freq] != "" and sub_edge[:freq] != "\""
@@ -463,7 +491,7 @@ def output_graph_mini(path, graph)
         #output.gsub!(/\n/, "")
         fout.write(output)
     }
-    fout.write("}")
+    fout.write("]")
     fout.close
 end
 
