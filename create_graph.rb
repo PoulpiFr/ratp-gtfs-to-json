@@ -430,32 +430,6 @@ def output_graph(path, graph)
 end
 
 
- /   [
-    	{
-        stop_id: <stop_id>
-        name: <name>,
-        loc: {
-                lat: <latitude>,
-                lon: <longitude>
-            }
-        zip: <zipcode>,
-        edges: [
-                {
-                    "dest": <dest_stop_id>,
-                    "dur": <edge_duration>,
-                    "type": <edge_type>,
-                    "open": <hour_of_opening>,
-                    "close": <hour_of_closing>,
-                    "line": <line_number>,
-                    "dir": <line_direction>,
-                    "freq": <average_frequency>
-                }
-            ]
-        }
-    ]
-
-    /
-
 def output_graph_mini(path, graph)
     fout = File.open(path, 'w')
 
