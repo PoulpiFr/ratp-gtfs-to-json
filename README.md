@@ -25,7 +25,7 @@ Line X directory
    
 And the output is :
 
-[
+    [
     	{
         stop_id: <stop_id>
         name: <name>,
