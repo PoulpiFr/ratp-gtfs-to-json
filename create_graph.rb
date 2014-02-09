@@ -433,11 +433,11 @@ end
 def output_graph_mini(path, graph)
     fout = File.open(path, 'w')
 
-    fout.write("[")
+    fout.write("{\"data\":[")
     graph.each_with_index { |(key, node), index_node|
         output = ""
         output += "," if index_node > 0
-        output = "{"
+        output += "{"
         output += "\"stop_id\":\"#{key}\","
         output += "\"name\":\"#{node[:name]}\","
 		output += "\"loc\":{\"lat\":#{node[:lat].to_f.round(5)},\"lon\":#{node[:lon].to_f.round(5)}},"
@@ -465,7 +465,7 @@ def output_graph_mini(path, graph)
         #output.gsub!(/\n/, "")
         fout.write(output)
     }
-    fout.write("]")
+    fout.write("]}")
     fout.close
 end
 
