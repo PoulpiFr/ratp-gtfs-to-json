@@ -47,6 +47,14 @@ And the output is :
         }
     ]
 
+| Type | Desc |
+|------|------|
+| 0    | TRAM | 
+| 1    | METRO | 
+| 2    | METRO | 
+| 3    | BUS |
+| 4    | WALK | 
+
 You can see the full RATP GTFS description in the PDF file in the page linked above (direct link: http://data.ratp.fr/?eID=ics_od_datastoredownload&file=88)
 
 
