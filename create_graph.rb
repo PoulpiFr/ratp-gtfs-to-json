@@ -229,6 +229,7 @@ def parse_edges(params)
 
         #create node
         if graph[mapped_from_stop_id].nil?
+            next if stops[mapped_from_stop_id].nil?
             graph[mapped_from_stop_id] = stops[mapped_from_stop_id]
             graph[mapped_from_stop_id][:edges] = {}
             graph[mapped_from_stop_id][:visited] = 0
@@ -294,7 +295,7 @@ def parse_edges(params)
                 v[:type] == 4
             }
 
-            if result.nil?
+            if result.nil? && !stops[to_stop_id].nil?
                 graph[mapped_from_stop_id][:edges][mapped_to_stop_id] << {
                     :duration    => duration,
                     :begin_time  => begin_time,
@@ -434,10 +435,11 @@ def output_graph_mini(path, graph)
     fout = File.open(path, 'w')
 
     fout.write("{\"data\":[")
+    haveAncestor = false
     graph.each_with_index { |(key, node), index_node|
         haveEdges = false
         output = ""
-        output += "," if index_node > 0
+        output += "," if haveAncestor
         output += "{"
         output += "\"stop_id\":\"#{key}\","
         output += "\"name\":\"#{node[:name]}\","
@@ -447,28 +449,29 @@ def output_graph_mini(path, graph)
         node[:edges].each_with_index { |(dest_id, sub_edges), index|
 
             buff2 = ""
-            buff2 += "," if index > 0
+            buff2 += "," if index > 0 && haveEdges
 			
             sub_edges.each_with_index { |sub_edge, sub_index|
 
                 buff = ""
-                buff += "," if sub_index > 0
+                buff += "," if sub_index > 0 && haveEdges
 				#p sub_edge[:dir] if dest_id == "3766635"
                 buff += "{\"dest\":#{dest_id},"
                 buff += "\"dur\":#{sub_edge[:duration]},"
 				buff += "\"type\":#{sub_edge[:type]},"
 				#output += "\"open\":\"#{sub_edge[:begin_time]}\",\"close\":\"#{sub_edge[:end_time]}\","
-				buff += "\"line\":\"#{sub_edge[:line]}\","
-				buff += "\"dir\":\"#{sub_edge[:dir]}\"," if sub_edge[:dir] != "" and sub_edge[:dir] != '"'
-				buff += "\"freq\":#{sub_edge[:freq]}" if not sub_edge[:freq].nil? and sub_edge[:freq] != "" and sub_edge[:freq] != "\""
+				buff += "\"line\":\"#{sub_edge[:line]}\""
+				buff += ",\"dir\":\"#{sub_edge[:dir]}\"" if sub_edge[:dir] != "" and sub_edge[:dir] != '"'
+				buff += ",\"freq\":#{sub_edge[:freq]}" if not sub_edge[:freq].nil? and sub_edge[:freq] != "" and sub_edge[:freq] != "\""
                 buff += "}"
 
                 if not sub_edge[:line].empty?
                     output += buff2
                     output += buff
-                    buff2 = ""
                     haveEdges = true
                 end 
+
+                buff2 = ""
                                 
             }
         }
@@ -477,7 +480,10 @@ def output_graph_mini(path, graph)
 
         #output.gsub!(/\s+/, "")
         #output.gsub!(/\n/, "")
-        fout.write(output) if haveEdges
+        if haveEdges
+            fout.write(output) 
+            haveAncestor = true
+        end
     }
     fout.write("]}")
     fout.close
