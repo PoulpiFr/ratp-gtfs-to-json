@@ -435,6 +435,7 @@ def output_graph_mini(path, graph)
 
     fout.write("{\"data\":[")
     graph.each_with_index { |(key, node), index_node|
+        haveEdges = false
         output = ""
         output += "," if index_node > 0
         output += "{"
@@ -444,18 +445,31 @@ def output_graph_mini(path, graph)
 		output += "\"zip\":\"#{node[:zip]}\",\"edges\": ["
 		
         node[:edges].each_with_index { |(dest_id, sub_edges), index|
-            output += "," if index > 0
+
+            buff2 = ""
+            buff2 += "," if index > 0
 			
-            sub_edges.each_with_index { |sub_edge, sub_index| 
-                output += "," if sub_index > 0
+            sub_edges.each_with_index { |sub_edge, sub_index|
+
+                buff = ""
+                buff += "," if sub_index > 0
 				#p sub_edge[:dir] if dest_id == "3766635"
-                output += "{\"dest\":#{dest_id},\"dur\":#{sub_edge[:duration]},"
-				output += "\"type\":#{sub_edge[:type]},"
+                buff += "{\"dest\":#{dest_id},"
+                buff += "\"dur\":#{sub_edge[:duration]},"
+				buff += "\"type\":#{sub_edge[:type]},"
 				#output += "\"open\":\"#{sub_edge[:begin_time]}\",\"close\":\"#{sub_edge[:end_time]}\","
-				output += "\"line\":\"#{sub_edge[:line]}\""
-				output += ",\"dir\":\"#{sub_edge[:dir]}\"" if sub_edge[:dir] != "" and sub_edge[:dir] != '"'
-				output += ",\"freq\":#{sub_edge[:freq]}" if not sub_edge[:freq].nil? and sub_edge[:freq] != "" and sub_edge[:freq] != "\""
-                output += "}"                
+				buff += "\"line\":\"#{sub_edge[:line]}\","
+				buff += "\"dir\":\"#{sub_edge[:dir]}\"," if sub_edge[:dir] != "" and sub_edge[:dir] != '"'
+				buff += "\"freq\":#{sub_edge[:freq]}" if not sub_edge[:freq].nil? and sub_edge[:freq] != "" and sub_edge[:freq] != "\""
+                buff += "}"
+
+                if not sub_edge[:line].empty?
+                    output += buff2
+                    output += buff
+                    buff2 = ""
+                    haveEdges = true
+                end 
+                                
             }
         }
 
@@ -463,7 +477,7 @@ def output_graph_mini(path, graph)
 
         #output.gsub!(/\s+/, "")
         #output.gsub!(/\n/, "")
-        fout.write(output)
+        fout.write(output) if haveEdges
     }
     fout.write("]}")
     fout.close
