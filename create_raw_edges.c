@@ -256,7 +256,7 @@ void r_parse_transfers_file(char *path, r_hashtable *edges_table)
     char buffer_line[1024];
     char *pch = NULL;
 
-    char *from_stop_id = NULL, *to_stop_id = NULL;
+    char from_stop_id[255], to_stop_id[255];
 
     int duration = 0;
 
