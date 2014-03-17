@@ -29,8 +29,8 @@ edge structure
 */
 
 typedef struct r_edge {
-    int to_stop_id;
-    int from_stop_id;
+    char to_stop_id[255];
+    char from_stop_id[255];
     int duration;
     int debut;
 	int last_encounter;
@@ -83,7 +83,7 @@ FILE* r_open_file(char *path, char *mode)
 r_create_edge
 =============
 */
-r_edge* r_create_edge(int from_stop_id, int to_stop_id, int type)
+r_edge* r_create_edge(char* from_stop_id, char* to_stop_id, int type)
 {    
     r_edge *new = malloc( sizeof(r_edge) );
 /*
@@ -91,8 +91,8 @@ r_edge* r_create_edge(int from_stop_id, int to_stop_id, int type)
         fprintf(stderr, "ERROR in r_create_edge: 0 -> : %d\n", to_stop_id);
     }
 */
-    new->from_stop_id   = from_stop_id;
-    new->to_stop_id     = to_stop_id;
+    strcpy(new->from_stop_id, from_stop_id);
+    strcpy(new->to_stop_id, to_stop_id);
     new->type           = type;
     new->duration       = 0;
     new->counter        = 0;
@@ -174,8 +174,7 @@ void r_parse_stop_times_file(char *path, r_hashtable *edges_table)
     char *pch = NULL;
 
     //inputs buffers
-    char trip_id[255];
-    int to_stop_id = 0, from_stop_id = 0;
+    char trip_id[255], to_stop_id[255], from_stop_id[255];
     int dep_time = 0, last_dep_time = 0;
 
 
@@ -198,9 +197,7 @@ void r_parse_stop_times_file(char *path, r_hashtable *edges_table)
         {
             strcpy(trip_id, pch);
             dep_time = 0;
-            to_stop_id = 0;
             last_dep_time = 0;
-            from_stop_id = 0;
         }
 
         //get dep_time and stop_id fields
@@ -216,12 +213,12 @@ void r_parse_stop_times_file(char *path, r_hashtable *edges_table)
             //stop_id
             if(i == 2)
             {
-                from_stop_id = to_stop_id;
-                to_stop_id = atoi(pch);
+                strcpy(from_stop_id, to_stop_id);
+                strcpy(to_stop_id, pch);
             }
         }
 
-        sprintf(key, "%d%d", from_stop_id, to_stop_id);
+        sprintf(key, "%s%s", from_stop_id, to_stop_id);
         if( (edge = r_hash_get(edges_table, key)) == NULL )
         {
             edge = r_create_edge(from_stop_id, to_stop_id, METRO);
@@ -259,8 +256,9 @@ void r_parse_transfers_file(char *path, r_hashtable *edges_table)
     char buffer_line[1024];
     char *pch = NULL;
 
-    int from_stop_id = 0, to_stop_id = 0, duration = 0;
+    char *from_stop_id = NULL, *to_stop_id = NULL;
 
+    int duration = 0;
 
     fin = r_open_file(path, "r");
 
@@ -270,15 +268,15 @@ void r_parse_transfers_file(char *path, r_hashtable *edges_table)
     {
         pch = strtok(buffer_line, ",");
 
-        from_stop_id = atoi(pch);
+        strcpy(from_stop_id,pch);
 
         for(i=0; pch = strtok(NULL, ","); i++)
         {
-            if(i == 0) { to_stop_id = atoi(pch); }
+            if(i == 0) { strcpy(to_stop_id,pch); }
             if(i == 2) { duration = atoi(pch); }
         }
 
-        sprintf(key, "%d%d", from_stop_id, to_stop_id);
+        sprintf(key, "%s%s", from_stop_id, to_stop_id);
 
         edge = r_create_edge(from_stop_id, to_stop_id, CORRESPONDANCE);
         r_hash_add(edges_table, edge, key);
@@ -306,7 +304,7 @@ void r_print_edge(void *edge)
         exit(1);
     }
 
-    if( ((r_edge *)edge)->from_stop_id == 0 ) {
+    if( ((r_edge *)edge)->from_stop_id == NULL) {
         return;
     }
 
@@ -330,7 +328,7 @@ void r_print_edge(void *edge)
     start_time = ((r_edge *)edge)->debut;
     end_time = ((r_edge *)edge)->end;
 
-    printf("%d,%d,%d,%dh%d,%dh%d,%d", 
+    printf("%s,%s,%d,%dh%d,%dh%d,%d", 
         ((r_edge *)edge)->from_stop_id,
         ((r_edge *)edge)->to_stop_id,
         average_duration,
@@ -357,7 +355,7 @@ r_destroy_edge
 void r_destroy_edge(void *edge)
 {
     #ifdef EDGE_DEBUG
-        fprintf(stderr, "Destroying edge %d -> %d\n", 
+        fprintf(stderr, "Destroying edge %s -> %s\n", 
             ((r_edge *)edge)->from_stop_id, 
             ((r_edge *)edge)->to_stop_id);
     #endif
