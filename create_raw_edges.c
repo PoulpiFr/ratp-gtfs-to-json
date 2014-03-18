@@ -198,6 +198,10 @@ void r_parse_stop_times_file(char *path, r_hashtable *edges_table)
             strcpy(trip_id, pch);
             dep_time = 0;
             last_dep_time = 0;
+            for (j=0;j<255;j++) {
+                to_stop_id[j]='A';
+                from_stop_id[j]='A';
+            }
         }
 
         //get dep_time and stop_id fields
@@ -298,13 +302,20 @@ void r_print_edge(void *edge)
     int average_duration = 0;
     int start_time = 0;
     int end_time = 0;
+    char edge_null[255];
+    int i;
+
+    for (i=0;i<255;i++) {
+        edge_null[i] = 'A';
+    }
+
 
     if(edge == NULL) {
         fprintf(stderr, "ERROR in r_print_edge: edge to be printed is NULL\n");
         exit(1);
     }
 
-    if( ((r_edge *)edge)->from_stop_id == NULL) {
+    if( strcmp(((r_edge *)edge)->from_stop_id, edge_null)!= 0 ) {
         return;
     }
 
@@ -313,7 +324,7 @@ void r_print_edge(void *edge)
         average_duration = (((r_edge *)edge)->duration) / counter;
         /*
         if(average_duration < 60) {
-            fprintf(stderr, "WARNING: duration: %d, counter: %d for edge %d->%d\n", 
+            fprintf(stderr, "WARNING: duration: %d, counter: %d for edge %s->%s\n", 
                 ((r_edge *)edge)->duration, 
                 counter,
                 ((r_edge *)edge)->from_stop_id,
